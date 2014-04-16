@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# Script to make a proxy (ie HAProxy) capable of monitoring Percona XtraDB Cluster nodes properly
+# Script to make a proxy (ie HAProxy) capable of monitoring Galera cluster nodes properly
 #
 # Author: Olaf van Zandwijk <olaf.vanzandwijk@nedap.com>
 # Author: Raghavendra Prabhu <raghavendra.prabhu@percona.com>
@@ -19,8 +19,8 @@ MYSQL_USERNAME="${MYSQL_USERNAME-clustercheckuser}"
 MYSQL_PASSWORD="${MYSQL_PASSWORD-clustercheckpassword!}"
 MYSQL_HOST="${MYSQL_HOST:-127.0.0.1}"
 MYSQL_PORT="${MYSQL_PORT:-3306}"
-AVAILABLE_WHEN_DONOR=${AVAILABLE_WHEN_DONOR:-0}
 ERR_FILE="${ERR_FILE:-/dev/null}"
+AVAILABLE_WHEN_DONOR=${AVAILABLE_WHEN_DONOR:-0}
 AVAILABLE_WHEN_READONLY=${AVAILABLE_WHEN_READONLY:-1}
 DEFAULTS_EXTRA_FILE=${DEFAULTS_EXTRA_FILE:-/etc/my.cnf}
 
@@ -51,39 +51,39 @@ then
                     2>${ERR_FILE} | tail -1 2>>${ERR_FILE})
 
         if [[ "${READ_ONLY}" == "ON" ]];then
-            # Percona XtraDB Cluster node local state is 'Synced', but it is in
+            # Galera cluster node local state is 'Synced', but it is in
             # read-only mode. The variable AVAILABLE_WHEN_READONLY is set to 0.
             # => return HTTP 503
             # Shell return-code is 1
             echo -en "HTTP/1.1 503 Service Unavailable\r\n"
             echo -en "Content-Type: text/plain\r\n"
             echo -en "Connection: close\r\n"
-            echo -en "Content-Length: 43\r\n"
+            echo -en "Content-Length: 35\r\n"
             echo -en "\r\n"
-            echo -en "Percona XtraDB Cluster Node is read-only.\r\n"
+            echo -en "Galera cluster node is read-only.\r\n"
             sleep 0.1
             exit 1
         fi
     fi
-    # Percona XtraDB Cluster node local state is 'Synced' => return HTTP 200
+    # Galera cluster node local state is 'Synced' => return HTTP 200
     # Shell return-code is 0
     echo -en "HTTP/1.1 200 OK\r\n"
     echo -en "Content-Type: text/plain\r\n"
     echo -en "Connection: close\r\n"
-    echo -en "Content-Length: 40\r\n"
+    echo -en "Content-Length: 32\r\n"
     echo -en "\r\n"
-    echo -en "Percona XtraDB Cluster Node is synced.\r\n"
+    echo -en "Galera cluster node is synced.\r\n"
     sleep 0.1
     exit 0
 else
-    # Percona XtraDB Cluster node local state is not 'Synced' => return HTTP 503
+    # Galera cluster node local state is not 'Synced' => return HTTP 503
     # Shell return-code is 1
     echo -en "HTTP/1.1 503 Service Unavailable\r\n"
     echo -en "Content-Type: text/plain\r\n"
     echo -en "Connection: close\r\n"
-    echo -en "Content-Length: 44\r\n"
+    echo -en "Content-Length: 36\r\n"
     echo -en "\r\n"
-    echo -en "Percona XtraDB Cluster Node is not synced.\r\n"
+    echo -en "Galera cluster node is not synced.\r\n"
     sleep 0.1
     exit 1
 fi
